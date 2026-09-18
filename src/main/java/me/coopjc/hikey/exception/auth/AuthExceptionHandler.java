@@ -20,4 +20,17 @@ public class AuthExceptionHandler {
 
         return new ResponseEntity<>(error, ex.getStatus());
     }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorizedException(UnauthorizedException ex, HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse();
+
+        error.setErrorCode(ex.getErrorCode());
+        error.setMessage(ex.getMessage());
+        error.setStatus(ex.getStatus().value());
+        error.setPath(request.getRequestURI());
+
+        return new ResponseEntity<>(error, ex.getStatus());
+    }
+
 }
