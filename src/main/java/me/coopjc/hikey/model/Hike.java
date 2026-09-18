@@ -23,6 +23,12 @@ public class Hike extends BaseModel {
     @Column(nullable = false)
     private HikeStatus status;
 
+    @Column(nullable = false)
+    private float distanceMiles;
+
+    @Column(nullable = false)
+    private float durationMin;
+
     public long getId() {
         return id;
     }
@@ -43,6 +49,14 @@ public class Hike extends BaseModel {
         return status;
     }
 
+    public float getDistanceMiles() {
+        return distanceMiles;
+    }
+
+    public float getDurationMin() {
+        return durationMin;
+    }
+
     public void setUser(User user) {
         this.user = user;
     }
@@ -57,5 +71,13 @@ public class Hike extends BaseModel {
 
     public void setStatus(HikeStatus status) {
         this.status = status;
+    }
+
+    public void setDistanceMiles(float distanceMiles) {
+        this.distanceMiles = distanceMiles;
+    }
+
+    public void setDurationMin(float durationMin) {
+        this.durationMin = durationMin;
     }
 }
