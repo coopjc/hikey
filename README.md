@@ -2,6 +2,8 @@
 
 Backend for Hikey, an app for hiking enthusiasts.  
 
-I built this to practice designing a Spring Boot REST API with JWT authentication while incorporating my love for hiking and the outdoors.
+I built this to practice designing a Spring Boot REST API with JWT authentication.
 
-**Stack:** Spring Boot and PostgreSQL
+**Stack:** Java, Spring Boot, JPA/Hibernate, PostgreSQL
+
+**Frontend:** [Hikey App](https://github.com/coopjc/hikey_app)
