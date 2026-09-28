@@ -2,10 +2,13 @@ package me.coopjc.hikey.service;
 
 import me.coopjc.hikey.dto.auth.LoginRequest;
 import me.coopjc.hikey.dto.auth.RegisterRequest;
+import me.coopjc.hikey.dto.user.CreateUserCommand;
 import me.coopjc.hikey.exception.auth.InvalidCredentialsException;
 import me.coopjc.hikey.exception.user.UserAlreadyExistsException;
 import me.coopjc.hikey.exception.user.UserNotFoundException;
+import me.coopjc.hikey.model.Credentials;
 import me.coopjc.hikey.model.User;
+import me.coopjc.hikey.repository.CredentialsRepository;
 import me.coopjc.hikey.repository.UserRepository;
 import me.coopjc.hikey.security.JwtService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,39 +17,42 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuthService {
 
-    private final UserRepository userRepository;
+    private final CredentialsRepository credentialsRepository;
+    private final UserService userService;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
 
-    public AuthService(UserRepository userRepository, JwtService jwtService, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
+    public AuthService(CredentialsRepository credentialsRepository, UserService userService, JwtService jwtService, PasswordEncoder passwordEncoder) {
+        this.credentialsRepository = credentialsRepository;
+        this.userService = userService;
         this.jwtService = jwtService;
         this.passwordEncoder = passwordEncoder;
     }
 
     public String registerUser(RegisterRequest request) {
-        if(userRepository.existsByEmail(request.email())) {
-            throw new UserAlreadyExistsException();
-        }
+        User user = userService.createUser(
+                new CreateUserCommand(
+                        request.email(),
+                        request.password(),
+                        request.displayName(),
+                        request.age()
+                )
+        );
 
-        User user = new User();
-
-        user.setEmail(request.email());
-        user.setPasswordHash(passwordEncoder.encode(request.password()));
-        user.setDisplayName(request.displayName());
-        user.setAge(request.age());
-
-        user = userRepository.save(user);
+        String passwordHash = passwordEncoder.encode(request.password());
+        credentialsRepository.save(new Credentials(user, passwordHash));
 
         return jwtService.generateToken(user.getId(), user.getEmail());
     }
 
     public String loginUser(LoginRequest request) {
-        User user = userRepository.findByEmail(request.email())
-                .orElseThrow(UserNotFoundException::new);
+        User user = userService.getUserByEmail(request.email());
+
+        Credentials credentials = credentialsRepository.findByUserId(user.getId())
+                .orElseThrow(InvalidCredentialsException::new);
 
         // Password hashes don't match
-        if(!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
+        if(!passwordEncoder.matches(request.password(), credentials.getPasswordHash())) {
             throw new InvalidCredentialsException();
         }
 

@@ -1,5 +1,7 @@
 package me.coopjc.hikey.service;
 
+import me.coopjc.hikey.dto.user.CreateUserCommand;
+import me.coopjc.hikey.exception.user.UserAlreadyExistsException;
 import me.coopjc.hikey.exception.user.UserNotFoundException;
 import me.coopjc.hikey.model.User;
 import me.coopjc.hikey.repository.UserRepository;
@@ -23,5 +25,19 @@ public class UserService {
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(UserNotFoundException::new);
+    }
+
+    public User createUser(CreateUserCommand createUserCommand) {
+        if(userRepository.existsByEmail(createUserCommand.email())) {
+            throw new UserAlreadyExistsException();
+        }
+
+        User user = new User();
+
+        user.setEmail(createUserCommand.email());
+        user.setDisplayName(createUserCommand.displayName());
+        user.setAge(createUserCommand.age());
+
+        return userRepository.save(user);
     }
 }
