@@ -46,7 +46,15 @@ public class AuthService {
     }
 
     public String loginUser(LoginRequest request) {
-        User user = userService.getUserByEmail(request.email());
+        User user;
+
+        // Catch UserNotFoundException and Throw InvalidCredentialsException
+        // Avoid Showing Existing User Account
+        try {
+            user = userService.getUserByEmail(request.email());
+        } catch (UserNotFoundException ex) {
+            throw new InvalidCredentialsException();
+        }
 
         Credentials credentials = credentialsRepository.findByUserId(user.getId())
                 .orElseThrow(InvalidCredentialsException::new);
