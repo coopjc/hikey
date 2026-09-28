@@ -11,7 +11,6 @@ import java.util.List;
 
 @Entity
 @Table(name = "users")
-@EntityListeners(AuditingEntityListener.class)
 public class User extends BaseModel {
 
     @Id
@@ -20,9 +19,6 @@ public class User extends BaseModel {
 
     @Column(nullable = false, unique = true)
     private String email;
-
-    @Column(name = "password_hash", nullable = false)
-    private String passwordHash;
 
     @Column(name = "display_name", nullable = false)
     private String displayName;
@@ -38,10 +34,6 @@ public class User extends BaseModel {
         return email;
     }
 
-    public String getPasswordHash() {
-        return passwordHash;
-    }
-
     public String getDisplayName() {
         return displayName;
     }
@@ -54,10 +46,6 @@ public class User extends BaseModel {
         this.email = email;
     }
 
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
-    }
-
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
@@ -65,6 +53,4 @@ public class User extends BaseModel {
     public void setAge(int age) {
         this.age = age;
     }
-
-
 }
