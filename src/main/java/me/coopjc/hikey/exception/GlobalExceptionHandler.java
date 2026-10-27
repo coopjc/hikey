@@ -16,17 +16,28 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // TODO: ADD A BUNCH OF ERROR HANDLERS
+    // Handles a request with an invalid argument
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex, HttpServletRequest request) {
+        ErrorResponse error = getErrorResponse(
+                "BAD_REQUEST",
+                ex.getMessage(),
+                HttpStatus.BAD_REQUEST,
+                request.getRequestURI()
+        );
+
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
 
     // Handles a request with an invalid method
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ErrorResponse> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException ex, HttpServletRequest request) {
-        ErrorResponse error = new ErrorResponse();
-
-        error.setErrorCode("METHOD_NOT_SUPPORTED");
-        error.setMessage(ex.getMessage());
-        error.setStatus(ex.getStatusCode().value());
-        error.setPath(request.getRequestURI());
+        ErrorResponse error = getErrorResponse(
+                "METHOD_NOT_ALLOWED",
+                ex.getMessage(),
+                HttpStatus.METHOD_NOT_ALLOWED,
+                request.getRequestURI()
+        );
 
         return new ResponseEntity<>(error, ex.getStatusCode());
     }
@@ -40,12 +51,12 @@ public class GlobalExceptionHandler {
                 fieldErrors.put(error.getField(), error.getDefaultMessage())
         );
 
-        ErrorResponse error = new ErrorResponse();
-
-        error.setErrorCode("VALIDATION_FAILED");
-        error.setMessage("Validation failed: " + fieldErrors + ".");
-        error.setStatus(ex.getStatusCode().value());
-        error.setPath(request.getRequestURI());
+        ErrorResponse error = getErrorResponse(
+                "VALIDATION_FAILED",
+                fieldErrors.toString(),
+                HttpStatus.UNPROCESSABLE_CONTENT,
+                request.getRequestURI()
+        );
 
         return new ResponseEntity<>(error, ex.getStatusCode());
     }
@@ -53,14 +64,25 @@ public class GlobalExceptionHandler {
     // Handles a request with an invalid body
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleMalformedJson(HttpMessageNotReadableException ex, HttpServletRequest request) {
-        ErrorResponse error = new ErrorResponse();
-
-        error.setErrorCode("MALFORMED_REQUEST");
-        error.setMessage("Request body is not valid JSON.");
-        error.setStatus(HttpStatus.BAD_REQUEST.value());
-        error.setPath(request.getRequestURI());
+        ErrorResponse error = getErrorResponse(
+                "MALFORMED_REQUEST",
+                "Request body is not valid JSON.",
+                HttpStatus.BAD_REQUEST,
+                request.getRequestURI()
+        );
 
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    public static ErrorResponse getErrorResponse(String code, String message, HttpStatus status, String path) {
+        ErrorResponse response = new ErrorResponse();
+
+        response.setErrorCode(code);
+        response.setMessage(message);
+        response.setStatus(status.value());
+        response.setPath(path);
+
+        return response;
     }
 
 }
