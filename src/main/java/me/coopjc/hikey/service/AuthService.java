@@ -4,15 +4,14 @@ import me.coopjc.hikey.dto.auth.LoginRequest;
 import me.coopjc.hikey.dto.auth.RegisterRequest;
 import me.coopjc.hikey.dto.user.CreateUserCommand;
 import me.coopjc.hikey.exception.auth.InvalidCredentialsException;
-import me.coopjc.hikey.exception.user.UserAlreadyExistsException;
 import me.coopjc.hikey.exception.user.UserNotFoundException;
 import me.coopjc.hikey.model.Credentials;
 import me.coopjc.hikey.model.User;
 import me.coopjc.hikey.repository.CredentialsRepository;
-import me.coopjc.hikey.repository.UserRepository;
 import me.coopjc.hikey.security.JwtService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AuthService {
@@ -29,6 +28,7 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    @Transactional
     public String registerUser(RegisterRequest request) {
         User user = userService.createUser(
                 new CreateUserCommand(
@@ -45,6 +45,7 @@ public class AuthService {
         return jwtService.generateToken(user.getId(), user.getEmail());
     }
 
+    @Transactional
     public String loginUser(LoginRequest request) {
         User user;
 
