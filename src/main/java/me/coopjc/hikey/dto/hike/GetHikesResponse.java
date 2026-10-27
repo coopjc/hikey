@@ -1,13 +1,11 @@
 package me.coopjc.hikey.dto.hike;
 
-import me.coopjc.hikey.model.Hike;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 public record GetHikesResponse(
-        List<HikeResponse> hikes
+        Page<HikeResponse> hikes
 ) {
-    public static GetHikesResponse from(List<HikeResponse> hikes) {
+    public static GetHikesResponse from(Page<HikeResponse> hikes) {
         return new GetHikesResponse(hikes);
     }
 }

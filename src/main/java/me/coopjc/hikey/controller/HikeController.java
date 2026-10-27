@@ -6,6 +6,7 @@ import me.coopjc.hikey.dto.Response;
 import me.coopjc.hikey.model.Hike;
 import me.coopjc.hikey.model.HikePoint;
 import me.coopjc.hikey.service.HikeService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -24,17 +25,19 @@ public class HikeController {
     }
 
     @GetMapping
-    public ResponseEntity<Response> getHikes(@AuthenticationPrincipal long userId) {
-        List<Hike> hikes = hikeService.getHikes(userId);
-
-        List<HikeResponse> hikeResponses = hikes.stream()
-                .map(HikeResponse::from)
-                .toList();
+    public ResponseEntity<Response> getHikes(@AuthenticationPrincipal long userId,
+                                             @RequestParam(defaultValue = "0") int page,
+                                             @RequestParam(defaultValue = "10") int size,
+                                             @RequestParam(defaultValue = "id") String sortBy,
+                                             @RequestParam(defaultValue = "asc") String direction)
+    {
+        Page<Hike> hikes = hikeService.getHikes(userId, page, size, sortBy, direction);
+        Page<HikeResponse> hikesResponse = hikes.map(HikeResponse::from);
 
         Response response = new Response();
 
-        response.setMessage("Successfully returned " + hikes.size() + " hikes.");
-        response.setData(GetHikesResponse.from(hikeResponses));
+        response.setMessage("Successfully returned " + hikes.getTotalElements() + " hikes.");
+        response.setData(hikesResponse);
         response.setStatus(HttpStatus.OK.value());
 
         return new ResponseEntity<>(response, HttpStatus.OK);
