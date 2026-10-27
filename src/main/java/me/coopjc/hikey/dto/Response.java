@@ -1,10 +1,11 @@
 package me.coopjc.hikey.dto;
 
 import java.time.LocalDateTime;
+
 public class Response {
 
     private String message;
-    private Record data;
+    private Object data;
     private int status;
     private LocalDateTime timestamp;
 
@@ -16,7 +17,7 @@ public class Response {
         this.message = message;
     }
 
-    public void setData(Record data) {
+    public void setData(Object data) {
         this.data = data;
     }
 
@@ -28,7 +29,7 @@ public class Response {
         return message;
     }
 
-    public Record getData() {
+    public Object getData() {
         return data;
     }
 
