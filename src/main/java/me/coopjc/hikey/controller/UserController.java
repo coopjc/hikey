@@ -25,7 +25,7 @@ public class UserController {
 
         Response response = new Response();
 
-        response.setMessage("This is you!");
+        response.setMessage("This is you");
         response.setData(UserResponse.from(user));
         response.setStatus(HttpStatus.OK.value());
 

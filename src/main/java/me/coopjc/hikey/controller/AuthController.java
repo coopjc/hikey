@@ -29,7 +29,7 @@ public class AuthController {
 
         Response response = new Response();
 
-        response.setMessage("Successfully registered.");
+        response.setMessage("Registration successful");
         response.setData(new AuthResponse(token));
         response.setStatus(HttpStatus.CREATED.value());
 
@@ -42,7 +42,7 @@ public class AuthController {
 
         Response response = new Response();
 
-        response.setMessage("Successfully logged in.");
+        response.setMessage("Login successful");
         response.setData(new AuthResponse(token));
         response.setStatus(HttpStatus.OK.value());
 

@@ -36,7 +36,7 @@ public class HikeController {
 
         Response response = new Response();
 
-        response.setMessage("Successfully returned " + hikes.getTotalElements() + " hikes.");
+        response.setMessage("Successfully returned " + hikes.getTotalElements() + " hike(s)");
         response.setData(hikesResponse);
         response.setStatus(HttpStatus.OK.value());
 
@@ -51,7 +51,7 @@ public class HikeController {
 
         Response response = new Response();
 
-        response.setMessage("Successfully returned hike.");
+        response.setMessage("Successfully returned hike " + id);
         response.setData(HikeResponse.from(hike));
         response.setStatus(HttpStatus.OK.value());
 
@@ -66,7 +66,7 @@ public class HikeController {
 
         Response response = new Response();
 
-        response.setMessage("Successfully created hike.");
+        response.setMessage("Successfully created hike " + hike.getId());
         response.setData(HikeResponse.from(hike));
         response.setStatus(HttpStatus.CREATED.value());
 
@@ -82,7 +82,7 @@ public class HikeController {
 
         Response response = new Response();
 
-        response.setMessage("Successfully updated hike.");
+        response.setMessage("Successfully updated hike " + id);
         response.setData(HikeResponse.from(hike));
         response.setStatus(HttpStatus.OK.value());
 
@@ -97,7 +97,7 @@ public class HikeController {
 
         Response response = new Response();
 
-        response.setMessage("Successfully deleted hike.");
+        response.setMessage("Successfully deleted hike " + id);
         response.setData(null);
         response.setStatus(HttpStatus.OK.value());
 
@@ -118,7 +118,7 @@ public class HikeController {
 
         Response response = new Response();
 
-        response.setMessage("Successfully returned " + hikePoints.size() + " hikes points.");
+        response.setMessage("Successfully returned " + hikePoints.size() + " points from hike " + id);
         response.setData(GetHikePointsResponse.from(hikePointsResponse));
         response.setStatus(HttpStatus.OK.value());
 
@@ -134,7 +134,7 @@ public class HikeController {
 
         Response response = new Response();
 
-        response.setMessage("Successfully pushed hike points");
+        response.setMessage("Successfully pushed " + request.hikePoints().size() + " points to hike " + id);
         response.setData(null);
         response.setStatus(HttpStatus.OK.value());
 
