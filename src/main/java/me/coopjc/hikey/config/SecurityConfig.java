@@ -54,7 +54,7 @@ public class SecurityConfig {
             ErrorResponse error = new ErrorResponse();
 
             error.setErrorCode("UNAUTHORIZED");
-            error.setMessage("You aren't logged in.");
+            error.setMessage("You aren't logged in");
             error.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             error.setPath(request.getRequestURI());
 

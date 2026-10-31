@@ -66,7 +66,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleMalformedJson(HttpMessageNotReadableException ex, HttpServletRequest request) {
         ErrorResponse error = getErrorResponse(
                 "MALFORMED_REQUEST",
-                "Request body is not valid JSON.",
+                "Request body is not valid JSON",
                 HttpStatus.BAD_REQUEST,
                 request.getRequestURI()
         );

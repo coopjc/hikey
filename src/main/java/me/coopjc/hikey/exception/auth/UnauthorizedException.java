@@ -5,6 +5,6 @@ import org.springframework.http.HttpStatus;
 
 public class UnauthorizedException extends BaseException {
     public UnauthorizedException() {
-        super("UNAUTHORIZED", "You aren't allowed to perform this action.", HttpStatus.UNAUTHORIZED);
+        super("UNAUTHORIZED", "You aren't allowed to perform this action", HttpStatus.UNAUTHORIZED);
     }
 }
