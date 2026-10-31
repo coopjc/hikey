@@ -13,9 +13,7 @@ import me.coopjc.hikey.repository.HikePointRepository;
 import me.coopjc.hikey.repository.HikeRepository;
 import me.coopjc.hikey.repository.UserRepository;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,15 +33,9 @@ public class HikeService {
     }
 
     @Transactional
-    public Page<Hike> getHikes(Long userId, int page, int size, String sortBy, String direction) {
+    public Page<Hike> getHikes(Long userId, Pageable pageable) {
         User user = userRepository.findById(userId)
                 .orElseThrow(UserNotFoundException::new);
-
-        Sort sort = direction.equalsIgnoreCase(Sort.Direction.DESC.name())
-                ? Sort.by(sortBy).descending()
-                : Sort.by(sortBy).ascending();
-
-        Pageable pageable = PageRequest.of(page, size, sort);
 
         return hikeRepository.findByUserId(user.getId(), pageable);
     }

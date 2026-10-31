@@ -7,6 +7,9 @@ import me.coopjc.hikey.model.Hike;
 import me.coopjc.hikey.model.HikePoint;
 import me.coopjc.hikey.service.HikeService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -31,7 +34,13 @@ public class HikeController {
                                              @RequestParam(defaultValue = "id") String sortBy,
                                              @RequestParam(defaultValue = "asc") String direction)
     {
-        Page<Hike> hikes = hikeService.getHikes(userId, page, size, sortBy, direction);
+        Sort sort = direction.equalsIgnoreCase(Sort.Direction.DESC.name())
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Hike> hikes = hikeService.getHikes(userId, pageable);
         Page<HikeResponse> hikesResponse = hikes.map(HikeResponse::from);
 
         Response response = new Response();
@@ -119,7 +128,7 @@ public class HikeController {
         Response response = new Response();
 
         response.setMessage("Successfully returned " + hikePoints.size() + " points from hike " + id);
-        response.setData(GetHikePointsResponse.from(hikePointsResponse));
+        response.setData(hikePointsResponse);
         response.setStatus(HttpStatus.OK.value());
 
         return new ResponseEntity<>(response, HttpStatus.OK);
