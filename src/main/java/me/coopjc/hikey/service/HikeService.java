@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -52,9 +53,11 @@ public class HikeService {
         User user = userService.getUserById(userId);
 
         Hike hike = new Hike();
+
         hike.setUser(user);
         hike.setName(request.name());
         hike.setStatus(HikeStatus.ACTIVE);
+        hike.setLastResumedAt(LocalDateTime.now());
 
         return hikeRepository.save(hike);
     }
@@ -62,21 +65,35 @@ public class HikeService {
     @Transactional
     public Hike pauseHike(Long userId, Long hikeId) {
         User user = userService.getUserById(userId);
-        return transitionHike(user.getId(), hikeId, HikeStatus.PAUSED, HikeStatus.ACTIVE);
+        Hike hike = transitionHike(user.getId(), hikeId, HikeStatus.PAUSED, HikeStatus.ACTIVE);
+
+        float activeMinutes = Duration.between(hike.getLastResumedAt(), LocalDateTime.now()).toMinutes();
+        hike.setDurationMin(hike.getDurationMin() + activeMinutes);
+        hike.setLastResumedAt(null);
+
+        return hike;
     }
 
     @Transactional
     public Hike resumeHike(Long userId, Long hikeId) {
         User user = userService.getUserById(userId);
-        return transitionHike(user.getId(), hikeId, HikeStatus.ACTIVE, HikeStatus.PAUSED);
+        Hike hike = transitionHike(user.getId(), hikeId, HikeStatus.ACTIVE, HikeStatus.PAUSED);
+
+        hike.setLastResumedAt(LocalDateTime.now());
+
+        return hike;
     }
 
     @Transactional
     public Hike completeHike(Long userId, Long hikeId) {
         User user = userService.getUserById(userId);
-
         Hike hike = getOwnedHike(user.getId(), hikeId);
+
         hike.setStatus(HikeStatus.COMPLETED);
+
+        float activeMinutes = Duration.between(hike.getLastResumedAt(), LocalDateTime.now()).toMinutes();
+        hike.setDurationMin(hike.getDurationMin() + activeMinutes);
+        hike.setLastResumedAt(null);
         hike.setCompletedAt(LocalDateTime.now());
 
         return hike;

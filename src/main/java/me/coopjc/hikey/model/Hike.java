@@ -1,6 +1,7 @@
 package me.coopjc.hikey.model;
 
 import jakarta.persistence.*;
+import org.springframework.cglib.core.Local;
 
 import java.time.LocalDateTime;
 
@@ -30,6 +31,8 @@ public class Hike extends BaseModel {
 
     @Column(nullable = false)
     private float durationMin;
+
+    private LocalDateTime lastResumedAt;
 
     private LocalDateTime completedAt;
 
@@ -61,6 +64,10 @@ public class Hike extends BaseModel {
         return durationMin;
     }
 
+    public LocalDateTime getLastResumedAt() {
+        return lastResumedAt;
+    }
+
     public LocalDateTime getCompletedAt() {
         return completedAt;
     }
@@ -87,6 +94,10 @@ public class Hike extends BaseModel {
 
     public void setDurationMin(float durationMin) {
         this.durationMin = durationMin;
+    }
+
+    public void setLastResumedAt(LocalDateTime lastResumedAt) {
+        this.lastResumedAt = lastResumedAt;
     }
 
     public void setCompletedAt(LocalDateTime completedAt) {
