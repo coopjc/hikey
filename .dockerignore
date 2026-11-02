@@ -1,0 +1,12 @@
+.env
+.env.*
+
+.git/
+.gitignore
+.gitattributes
+
+.idea/
+target/
+*.iml
+
+.DS_Store
