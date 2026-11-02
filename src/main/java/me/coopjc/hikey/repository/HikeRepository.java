@@ -10,9 +10,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface HikeRepository extends JpaRepository<Hike, Long> {
     Page<Hike> findByUserId(long userId, Pageable pageable);
+    Optional<Hike> findByIdAndUserId(long hikeId, long userId);
 
     @Query("""
     SELECT COUNT(h) AS totalHikes,
@@ -22,6 +25,4 @@ public interface HikeRepository extends JpaRepository<Hike, Long> {
       AND h.status = "COMPLETED"
     """)
     HikeStats findStatsByUserId(@Param("userId") long userId);
-
-    long user(User user);
 }

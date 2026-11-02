@@ -1,8 +1,9 @@
 package me.coopjc.hikey.service;
 
-import me.coopjc.hikey.dto.hike.CreateHikeRequest;
+import me.coopjc.hikey.dto.hike.StartHikeRequest;
 import me.coopjc.hikey.dto.hike.PushHikePointsRequest;
 import me.coopjc.hikey.dto.hike.UpdateHikeRequest;
+import me.coopjc.hikey.exception.hike.BadHikeTransitionException;
 import me.coopjc.hikey.exception.hike.HikeNotFoundException;
 import me.coopjc.hikey.model.*;
 import me.coopjc.hikey.repository.HikePointRepository;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -28,57 +30,63 @@ public class HikeService {
     }
 
     @Transactional
-    public Page<Hike> getHikes(Long userId, Pageable pageable) {
+    public Page<Hike> getUserHikes(Long userId, Pageable pageable) {
         User user = userService.getUserById(userId);
         return hikeRepository.findByUserId(user.getId(), pageable);
     }
 
-    public HikeStats getStats(Long userId) {
+    @Transactional
+    public HikeStats getUserHikeStats(Long userId) {
         User user = userService.getUserById(userId);
         return hikeRepository.findStatsByUserId(user.getId());
     }
 
-
     @Transactional
-    public Hike getHikeById(Long userId, Long hikeId) {
+    public Hike getUserHikeById(Long userId, Long hikeId) {
         User user = userService.getUserById(userId);
-
-        Hike hike = hikeRepository.findById(hikeId)
-                .orElseThrow(HikeNotFoundException::new);
-
-        // Hike doesn't belong to user
-        if(!user.getId().equals(hike.getUser().getId())) {
-            throw new HikeNotFoundException();
-        }
-
-        return hike;
+        return getOwnedHike(user.getId(), hikeId);
     }
 
     @Transactional
-    public Hike createHike(Long userId, CreateHikeRequest request) {
+    public Hike startHike(Long userId, StartHikeRequest request) {
         User user = userService.getUserById(userId);
 
         Hike hike = new Hike();
-
         hike.setUser(user);
         hike.setName(request.name());
-        hike.setNotes(request.notes());
-        hike.setStatus(HikeStatus.CREATED);
+        hike.setStatus(HikeStatus.ACTIVE);
 
         return hikeRepository.save(hike);
+    }
+
+    @Transactional
+    public Hike pauseHike(Long userId, Long hikeId) {
+        User user = userService.getUserById(userId);
+        return transitionHike(user.getId(), hikeId, HikeStatus.PAUSED, HikeStatus.ACTIVE);
+    }
+
+    @Transactional
+    public Hike resumeHike(Long userId, Long hikeId) {
+        User user = userService.getUserById(userId);
+        return transitionHike(user.getId(), hikeId, HikeStatus.ACTIVE, HikeStatus.PAUSED);
+    }
+
+    @Transactional
+    public Hike completeHike(Long userId, Long hikeId) {
+        User user = userService.getUserById(userId);
+
+        Hike hike = getOwnedHike(user.getId(), hikeId);
+        hike.setStatus(HikeStatus.COMPLETED);
+        hike.setCompletedAt(LocalDateTime.now());
+
+        return hike;
     }
 
     @Transactional
     public Hike updateHike(Long userId, Long hikeId, UpdateHikeRequest request) {
         User user = userService.getUserById(userId);
 
-        Hike hike = hikeRepository.findById(hikeId)
-                .orElseThrow(HikeNotFoundException::new);
-
-        // Hike doesn't belong to user
-        if(!user.getId().equals(hike.getUser().getId())) {
-            throw new HikeNotFoundException();
-        }
+        Hike hike = getOwnedHike(user.getId(), hikeId);
 
         if(request.name() != null) {
             hike.setName(request.name());
@@ -86,10 +94,6 @@ public class HikeService {
 
         if(request.notes() != null) {
             hike.setNotes(request.notes());
-        }
-
-        if(request.status() != null) {
-            hike.setStatus(request.status());
         }
 
         if(request.distanceMiles() != null) {
@@ -139,13 +143,9 @@ public class HikeService {
     public void pushHikePoints(Long userId, Long hikeId, PushHikePointsRequest request) {
         User user = userService.getUserById(userId);
 
-        Hike hike = hikeRepository.findById(hikeId)
-                .orElseThrow(HikeNotFoundException::new);
+        Hike hike = getOwnedHike(user.getId(), hikeId);
 
-        // Hike doesn't belong to user
-        if(!user.getId().equals(hike.getUser().getId())) {
-            throw new HikeNotFoundException();
-        }
+        // Don't allow if HikeStatus != PAUSED OR ACTIVE
 
         List<HikePoint> points = request.hikePoints().stream()
                 .map(p -> {
@@ -162,5 +162,22 @@ public class HikeService {
                 .toList();
 
         hikePointRepository.saveAll(points);
+    }
+
+    private Hike getOwnedHike(Long userId, Long hikeId) {
+        return hikeRepository.findByIdAndUserId(hikeId, userId)
+                .orElseThrow(HikeNotFoundException::new);
+    }
+
+    private Hike transitionHike(Long userId, Long hikeId, HikeStatus to, HikeStatus from) {
+        Hike hike = getOwnedHike(userId, hikeId);
+
+        if(hike.getStatus() != from) {
+            throw new BadHikeTransitionException();
+        }
+
+        hike.setStatus(to);
+
+        return hike;
     }
 }

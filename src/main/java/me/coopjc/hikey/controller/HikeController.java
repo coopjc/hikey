@@ -40,7 +40,7 @@ public class HikeController {
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<Hike> hikes = hikeService.getHikes(userId, pageable);
+        Page<Hike> hikes = hikeService.getUserHikes(userId, pageable);
         Page<HikeResponse> hikesResponse = hikes.map(HikeResponse::from);
 
         Response response = new Response();
@@ -56,7 +56,7 @@ public class HikeController {
     public ResponseEntity<Response> getHikeById(@AuthenticationPrincipal long userId,
                                                 @PathVariable long id)
     {
-        Hike hike = hikeService.getHikeById(userId, id);
+        Hike hike = hikeService.getUserHikeById(userId, id);
 
         Response response = new Response();
 
@@ -68,18 +68,63 @@ public class HikeController {
     }
 
     @PostMapping
-    public ResponseEntity<Response> createHike(@AuthenticationPrincipal long userId,
-                                               @Valid @RequestBody CreateHikeRequest request
+    public ResponseEntity<Response> startHike(@AuthenticationPrincipal long userId,
+                                              @Valid @RequestBody StartHikeRequest request
     ) {
-        Hike hike = hikeService.createHike(userId, request);
+        Hike hike = hikeService.startHike(userId, request);
 
         Response response = new Response();
 
-        response.setMessage("Successfully created hike " + hike.getId());
+        response.setMessage("Successfully started hike " + hike.getId());
         response.setData(HikeResponse.from(hike));
         response.setStatus(HttpStatus.CREATED.value());
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/{id}/pause")
+    public ResponseEntity<Response> pauseHike(@AuthenticationPrincipal long userId,
+                                              @PathVariable long id)
+    {
+        Hike hike = hikeService.pauseHike(userId, id);
+
+        Response response = new Response();
+
+        response.setMessage("Successfully paused hike " + hike.getId());
+        response.setData(HikeResponse.from(hike));
+        response.setStatus(HttpStatus.OK.value());
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PostMapping("/{id}/resume")
+    public ResponseEntity<Response> resumeHike(@AuthenticationPrincipal long userId,
+                                               @PathVariable long id)
+    {
+        Hike hike = hikeService.resumeHike(userId, id);
+
+        Response response = new Response();
+
+        response.setMessage("Successfully resumed hike " + hike.getId());
+        response.setData(HikeResponse.from(hike));
+        response.setStatus(HttpStatus.OK.value());
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PostMapping("/{id}/complete")
+    public ResponseEntity<Response> completeHike(@AuthenticationPrincipal long userId,
+                                                 @PathVariable long id)
+    {
+        Hike hike = hikeService.completeHike(userId, id);
+
+        Response response = new Response();
+
+        response.setMessage("Successfully completed hike " + hike.getId());
+        response.setData(HikeResponse.from(hike));
+        response.setStatus(HttpStatus.OK.value());
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PatchMapping("/{id}")

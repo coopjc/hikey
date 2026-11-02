@@ -21,4 +21,16 @@ public class HikeExceptionHandler {
 
         return new ResponseEntity<>(error, ex.getStatus());
     }
+
+    @ExceptionHandler(BadHikeTransitionException.class)
+    public ResponseEntity<ErrorResponse> handleBadHikeTransitionException(BadHikeTransitionException ex, HttpServletRequest request) {
+        ErrorResponse error = GlobalExceptionHandler.getErrorResponse(
+                ex.getErrorCode(),
+                ex.getMessage(),
+                ex.getStatus(),
+                request.getRequestURI()
+        );
+
+        return new ResponseEntity<>(error, ex.getStatus());
+    }
 }

@@ -2,6 +2,8 @@ package me.coopjc.hikey.model;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "hikes")
 public class Hike extends BaseModel {
@@ -28,6 +30,8 @@ public class Hike extends BaseModel {
 
     @Column(nullable = false)
     private float durationMin;
+
+    private LocalDateTime completedAt;
 
     public long getId() {
         return id;
@@ -57,6 +61,10 @@ public class Hike extends BaseModel {
         return durationMin;
     }
 
+    public LocalDateTime getCompletedAt() {
+        return completedAt;
+    }
+
     public void setUser(User user) {
         this.user = user;
     }
@@ -79,5 +87,9 @@ public class Hike extends BaseModel {
 
     public void setDurationMin(float durationMin) {
         this.durationMin = durationMin;
+    }
+
+    public void setCompletedAt(LocalDateTime completedAt) {
+        this.completedAt = completedAt;
     }
 }

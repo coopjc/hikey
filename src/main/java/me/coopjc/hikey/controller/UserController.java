@@ -39,7 +39,7 @@ public class UserController {
 
     @GetMapping("/me/stats")
     public ResponseEntity<Response> getCurrentUserStats(@AuthenticationPrincipal Long id) {
-        HikeStats stats = hikeService.getStats(id);
+        HikeStats stats = hikeService.getUserHikeStats(id);
 
         Response response = new Response();
 
