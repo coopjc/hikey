@@ -4,14 +4,9 @@ import me.coopjc.hikey.dto.hike.CreateHikeRequest;
 import me.coopjc.hikey.dto.hike.PushHikePointsRequest;
 import me.coopjc.hikey.dto.hike.UpdateHikeRequest;
 import me.coopjc.hikey.exception.hike.HikeNotFoundException;
-import me.coopjc.hikey.exception.user.UserNotFoundException;
-import me.coopjc.hikey.model.Hike;
-import me.coopjc.hikey.model.HikePoint;
-import me.coopjc.hikey.model.HikeStatus;
-import me.coopjc.hikey.model.User;
+import me.coopjc.hikey.model.*;
 import me.coopjc.hikey.repository.HikePointRepository;
 import me.coopjc.hikey.repository.HikeRepository;
-import me.coopjc.hikey.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,26 +19,29 @@ public class HikeService {
 
     private final HikeRepository hikeRepository;
     private final HikePointRepository hikePointRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
 
-    public HikeService(HikeRepository hikeRepository, HikePointRepository hikePointRepository, UserRepository userRepository) {
+    public HikeService(HikeRepository hikeRepository, HikePointRepository hikePointRepository, UserService userService) {
         this.hikeRepository = hikeRepository;
         this.hikePointRepository = hikePointRepository;
-        this.userRepository = userRepository;
+        this.userService = userService;
     }
 
     @Transactional
     public Page<Hike> getHikes(Long userId, Pageable pageable) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(UserNotFoundException::new);
-
+        User user = userService.getUserById(userId);
         return hikeRepository.findByUserId(user.getId(), pageable);
     }
 
+    public HikeStats getStats(Long userId) {
+        User user = userService.getUserById(userId);
+        return hikeRepository.findStatsByUserId(user.getId());
+    }
+
+
     @Transactional
     public Hike getHikeById(Long userId, Long hikeId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(UserNotFoundException::new);
+        User user = userService.getUserById(userId);
 
         Hike hike = hikeRepository.findById(hikeId)
                 .orElseThrow(HikeNotFoundException::new);
@@ -58,8 +56,7 @@ public class HikeService {
 
     @Transactional
     public Hike createHike(Long userId, CreateHikeRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(UserNotFoundException::new);
+        User user = userService.getUserById(userId);
 
         Hike hike = new Hike();
 
@@ -72,11 +69,10 @@ public class HikeService {
     }
 
     @Transactional
-    public Hike updateHike(Long userId, Long id, UpdateHikeRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(UserNotFoundException::new);
+    public Hike updateHike(Long userId, Long hikeId, UpdateHikeRequest request) {
+        User user = userService.getUserById(userId);
 
-        Hike hike = hikeRepository.findById(id)
+        Hike hike = hikeRepository.findById(hikeId)
                 .orElseThrow(HikeNotFoundException::new);
 
         // Hike doesn't belong to user
@@ -109,8 +105,7 @@ public class HikeService {
 
     @Transactional
     public void deleteHike(Long userId, Long hikeId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(UserNotFoundException::new);
+        User user = userService.getUserById(userId);
 
         Hike hike = hikeRepository.findById(hikeId)
                 .orElseThrow(HikeNotFoundException::new);
@@ -127,8 +122,7 @@ public class HikeService {
 
     @Transactional
     public List<HikePoint> getHikePointsByHikeId(Long userId, Long hikeId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(UserNotFoundException::new);
+        User user = userService.getUserById(userId);
 
         Hike hike = hikeRepository.findById(hikeId)
                 .orElseThrow(HikeNotFoundException::new);
@@ -143,8 +137,7 @@ public class HikeService {
 
     @Transactional
     public void pushHikePoints(Long userId, Long hikeId, PushHikePointsRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(UserNotFoundException::new);
+        User user = userService.getUserById(userId);
 
         Hike hike = hikeRepository.findById(hikeId)
                 .orElseThrow(HikeNotFoundException::new);
