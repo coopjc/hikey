@@ -6,6 +6,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class HikeyApplication {
 
+    public static final String version = "0.0.1";
+
     public static void main(String[] args) {
         SpringApplication.run(HikeyApplication.class, args);
     }
