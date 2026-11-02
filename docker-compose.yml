@@ -1,10 +1,25 @@
 services:
+  app:
+    build: .
+    container_name: hikey-api
+    restart: unless-stopped
+    environment:
+      DB_URL: 'jdbc:postgresql://postgres:5432/${DB_NAME}'
+      DB_USER: '${DB_USER}'
+      DB_PASSWORD: '${DB_PASSWORD}'
+      JWT_SECRET: '${JWT_SECRET}'
+    ports:
+      - '8080:8080'
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   postgres:
     image: 'postgres:16'
     container_name: hikey-db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: hikey_db
+      POSTGRES_DB: '${DB_NAME}'
       POSTGRES_USER: '${DB_USER}'
       POSTGRES_PASSWORD: '${DB_PASSWORD}'
     ports:
@@ -16,6 +31,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
   pgadmin:
     image: dpage/pgadmin4
     container_name: hikey-pgadmin
