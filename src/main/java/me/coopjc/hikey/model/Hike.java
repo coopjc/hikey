@@ -27,10 +27,10 @@ public class Hike extends BaseModel {
     private HikeStatus status;
 
     @Column(nullable = false)
-    private float distanceMiles;
+    private double distanceMiles = 0.0;
 
     @Column(nullable = false)
-    private float durationMin;
+    private double durationMin = 0.0;
 
     private LocalDateTime lastResumedAt;
 
@@ -56,11 +56,11 @@ public class Hike extends BaseModel {
         return status;
     }
 
-    public float getDistanceMiles() {
+    public double getDistanceMiles() {
         return distanceMiles;
     }
 
-    public float getDurationMin() {
+    public double getDurationMin() {
         return durationMin;
     }
 
@@ -88,11 +88,11 @@ public class Hike extends BaseModel {
         this.status = status;
     }
 
-    public void setDistanceMiles(float distanceMiles) {
+    public void setDistanceMiles(double distanceMiles) {
         this.distanceMiles = distanceMiles;
     }
 
-    public void setDurationMin(float durationMin) {
+    public void setDurationMin(double durationMin) {
         this.durationMin = durationMin;
     }
 
