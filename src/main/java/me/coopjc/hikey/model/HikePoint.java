@@ -20,6 +20,9 @@ public class HikePoint extends BaseModel {
     private Hike hike;
 
     @Column(nullable = false)
+    private int stretchIndex;
+
+    @Column(nullable = false)
     private double latitude;
 
     @Column(nullable = false)
@@ -37,6 +40,10 @@ public class HikePoint extends BaseModel {
 
     public Hike getHike() {
         return hike;
+    }
+
+    public int getStretchIndex() {
+        return stretchIndex;
     }
 
     public double getLatitude() {
@@ -67,6 +74,10 @@ public class HikePoint extends BaseModel {
 
     public void setHike(Hike hike) {
         this.hike = hike;
+    }
+
+    public void setStretchIndex(int stretchIndex) {
+        this.stretchIndex = stretchIndex;
     }
 
     public void setLatitude(double latitude) {

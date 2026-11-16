@@ -8,5 +8,6 @@ import java.util.List;
 
 @Repository
 public interface HikePointRepository extends JpaRepository<HikePoint, Long> {
-    List<HikePoint> findByHikeIdOrderByIdAsc(long hikeId);
+    List<HikePoint> findByHikeIdOrderBySavedAtAsc(long hikeId);
+    List<HikePoint> findByHikeIdOrderByStretchIndexAscSavedAtAsc(long hikeId);
 }

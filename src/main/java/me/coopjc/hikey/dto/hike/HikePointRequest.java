@@ -6,6 +6,9 @@ import java.time.LocalDateTime;
 
 public record HikePointRequest(
         @NotNull
+        int stretchIndex,
+
+        @NotNull
         Double latitude,
 
         @NotNull
