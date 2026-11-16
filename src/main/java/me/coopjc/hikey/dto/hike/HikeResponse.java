@@ -10,8 +10,9 @@ public record HikeResponse(
         String name,
         String notes,
         HikeStatus status,
-        float distanceMiles,
-        float durationMin,
+        double distanceMiles,
+        double durationMin,
+        LocalDateTime completedAt,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 
@@ -24,6 +25,7 @@ public record HikeResponse(
                 hike.getStatus(),
                 hike.getDistanceMiles(),
                 hike.getDurationMin(),
+                hike.getCompletedAt(),
                 hike.getCreatedAt(),
                 hike.getUpdatedAt()
         );
