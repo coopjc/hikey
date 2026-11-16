@@ -5,9 +5,11 @@ import me.coopjc.hikey.dto.hike.PushHikePointsRequest;
 import me.coopjc.hikey.dto.hike.UpdateHikeRequest;
 import me.coopjc.hikey.exception.hike.BadHikeTransitionException;
 import me.coopjc.hikey.exception.hike.HikeNotFoundException;
+import me.coopjc.hikey.exception.hike.InvalidHikePointStateException;
 import me.coopjc.hikey.model.*;
 import me.coopjc.hikey.repository.HikePointRepository;
 import me.coopjc.hikey.repository.HikeRepository;
+import me.coopjc.hikey.util.GeoUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -69,9 +71,8 @@ public class HikeService {
 
         float activeMinutes = Duration.between(hike.getLastResumedAt(), LocalDateTime.now()).toMinutes();
         hike.setDurationMin(hike.getDurationMin() + activeMinutes);
-        hike.setLastResumedAt(null);
 
-        return hike;
+        return hikeRepository.save(hike);
     }
 
     @Transactional
@@ -81,7 +82,7 @@ public class HikeService {
 
         hike.setLastResumedAt(LocalDateTime.now());
 
-        return hike;
+        return hikeRepository.save(hike);
     }
 
     @Transactional
@@ -89,14 +90,17 @@ public class HikeService {
         User user = userService.getUserById(userId);
         Hike hike = getOwnedHike(user.getId(), hikeId);
 
-        hike.setStatus(HikeStatus.COMPLETED);
+        double distanceMiles = computeDistanceMiles(hike.getId());
+        hike.setDistanceMiles(distanceMiles);
 
-        float activeMinutes = Duration.between(hike.getLastResumedAt(), LocalDateTime.now()).toMinutes();
-        hike.setDurationMin(hike.getDurationMin() + activeMinutes);
+        float durationMin = Duration.between(hike.getLastResumedAt(), LocalDateTime.now()).toMinutes();
+        hike.setDurationMin(hike.getDurationMin() + durationMin);
+
+        hike.setStatus(HikeStatus.COMPLETED);
         hike.setLastResumedAt(null);
         hike.setCompletedAt(LocalDateTime.now());
 
-        return hike;
+        return hikeRepository.save(hike);
     }
 
     @Transactional
@@ -144,31 +148,27 @@ public class HikeService {
     @Transactional
     public List<HikePoint> getHikePointsByHikeId(Long userId, Long hikeId) {
         User user = userService.getUserById(userId);
-
-        Hike hike = hikeRepository.findById(hikeId)
-                .orElseThrow(HikeNotFoundException::new);
-
-        // Hike doesn't belong to user
-        if(!user.getId().equals(hike.getUser().getId())) {
-            throw new HikeNotFoundException();
-        }
-
-        return hikePointRepository.findByHikeIdOrderByIdAsc(hikeId);
+        Hike hike = getOwnedHike(user.getId(), hikeId);
+        return hikePointRepository.findByHikeIdOrderBySavedAtAsc(hike.getId());
     }
 
     @Transactional
-    public void pushHikePoints(Long userId, Long hikeId, PushHikePointsRequest request) {
+    public List<HikePoint> pushHikePoints(Long userId, Long hikeId, PushHikePointsRequest request) {
         User user = userService.getUserById(userId);
 
         Hike hike = getOwnedHike(user.getId(), hikeId);
 
-        // Don't allow if HikeStatus != PAUSED OR ACTIVE
+        // Don't allow if hike status isn't active or paused
+        if(hike.getStatus() != HikeStatus.ACTIVE || hike.getStatus() != HikeStatus.PAUSED) {
+            throw new InvalidHikePointStateException();
+        }
 
         List<HikePoint> points = request.hikePoints().stream()
                 .map(p -> {
                     HikePoint point = new HikePoint();
 
                     point.setHike(hike);
+                    point.setStretchIndex(p.stretchIndex());
                     point.setLatitude(p.latitude());
                     point.setLongitude(p.longitude());
                     point.setElevation(p.elevation());
@@ -178,7 +178,7 @@ public class HikeService {
                 })
                 .toList();
 
-        hikePointRepository.saveAll(points);
+        return hikePointRepository.saveAll(points);
     }
 
     private Hike getOwnedHike(Long userId, Long hikeId) {
@@ -196,5 +196,22 @@ public class HikeService {
         hike.setStatus(to);
 
         return hike;
+    }
+
+    private double computeDistanceMiles(Long hikeId) {
+        List<HikePoint> points = hikePointRepository.findByHikeIdOrderByStretchIndexAscSavedAtAsc(hikeId);
+
+        double total = 0;
+
+        for(int i = 1; i < points.size(); i++) {
+            HikePoint prev = points.get(i - 1);
+            HikePoint cur = points.get(i);
+
+            if (prev.getStretchIndex() != cur.getStretchIndex()) continue;
+
+            total += GeoUtil.calcHaversineMiles(prev.getLatitude(), prev.getLongitude(), cur.getLatitude(), cur.getLongitude());
+        }
+
+        return total;
     }
 }
