@@ -33,4 +33,28 @@ public class HikeExceptionHandler {
 
         return new ResponseEntity<>(error, ex.getStatus());
     }
+
+    @ExceptionHandler(InvalidHikeStretchException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidHikeStretchException(InvalidHikeStretchException ex, HttpServletRequest request) {
+        ErrorResponse error = GlobalExceptionHandler.getErrorResponse(
+                ex.getErrorCode(),
+                ex.getMessage(),
+                ex.getStatus(),
+                request.getRequestURI()
+        );
+
+        return new ResponseEntity<>(error, ex.getStatus());
+    }
+
+    @ExceptionHandler(InvalidHikePointStateException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidHikePointStateException(InvalidHikePointStateException ex, HttpServletRequest request) {
+        ErrorResponse error = GlobalExceptionHandler.getErrorResponse(
+                ex.getErrorCode(),
+                ex.getMessage(),
+                ex.getStatus(),
+                request.getRequestURI()
+        );
+
+        return new ResponseEntity<>(error, ex.getStatus());
+    }
 }
