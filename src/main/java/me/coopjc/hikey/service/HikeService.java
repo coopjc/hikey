@@ -159,7 +159,7 @@ public class HikeService {
         Hike hike = getOwnedHike(user.getId(), hikeId);
 
         // Don't allow if hike status isn't active or paused
-        if(hike.getStatus() != HikeStatus.ACTIVE || hike.getStatus() != HikeStatus.PAUSED) {
+        if(hike.getStatus() != HikeStatus.ACTIVE && hike.getStatus() != HikeStatus.PAUSED) {
             throw new InvalidHikePointStateException();
         }
 
