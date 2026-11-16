@@ -184,12 +184,15 @@ public class HikeController {
                                                    @PathVariable long id,
                                                    @Valid @RequestBody PushHikePointsRequest request)
     {
-        hikeService.pushHikePoints(userId, id, request);
+        List<HikePointResponse> hikePointsResponse = hikeService.pushHikePoints(userId, id, request)
+                .stream()
+                .map(HikePointResponse::from)
+                .toList();
 
         Response response = new Response();
 
         response.setMessage("Successfully pushed " + request.hikePoints().size() + " points to hike " + id);
-        response.setData(null);
+        response.setData(hikePointsResponse);
         response.setStatus(HttpStatus.OK.value());
 
         return new ResponseEntity<>(response, HttpStatus.OK);
