@@ -117,14 +117,6 @@ public class HikeService {
             hike.setNotes(request.notes());
         }
 
-        if(request.distanceMiles() != null) {
-            hike.setDistanceMiles(request.distanceMiles());
-        }
-
-        if(request.durationMin() != null) {
-            hike.setDurationMin(request.durationMin());
-        }
-
         return hikeRepository.save(hike);
     }
 
